@@ -11,7 +11,6 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +42,6 @@ public class HomeController {
 
     @RequestMapping("/examples/word_count")
     List<?> wordCount(){
-        getClass().getResource("/data/words.txt").getFile();
         JavaRDD<String> textFile = jsc.textFile(getClass().getResource("/data/words.txt").getFile());
         JavaPairRDD<String, Integer> counts = textFile
                 .flatMap(s -> Arrays.asList(s.split(" ")).iterator())
@@ -89,5 +87,27 @@ public class HomeController {
         Dataset<Row> df = spark.sqlContext().createDataFrame(rowRDD, schema);
         Dataset<Row> lines = df.filter(col("line").like("%" + keyword + "%"));
         return lines.count();
+    }
+
+    @RequestMapping("/examples/simple_op")
+    long simpleDataOp() {
+        // Creates a DataFrame based on a table named "people"
+// stored in a MySQL database.
+        String url =
+                "jdbc:postgresql://localhost:7777/seal?user=seal;password=..xiao";
+        Dataset<Row> df = spark.sqlContext()
+                .read()
+                .format("jdbc")
+                .option("url", url)
+                .option("dbtable", "people")
+                .load();
+
+        // Looks the schema of this DataFrame.
+        df.printSchema();
+
+        // Counts people by age
+        Dataset<Row> countsByAge = df.groupBy("age").count();
+        countsByAge.show();
+        return 0;
     }
 }

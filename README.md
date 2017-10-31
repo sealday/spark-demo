@@ -17,6 +17,12 @@ JavaRDD<Integer> lineLengths = lines.map(new GetLength());
 int totalLength = lineLengths.reduce(new Sum());
 ```
 
+RDD 操作分类
+
+Transformations 转换，这类操作不会触发产生一个 job
+Actions 动作，这类操作将会触发一个 job
+Shuffle 洗牌（重分配），这类操作会造成数据迁移、重新分配，会形成一个新的 stage
+
 ## 累加器 Accumulators
 
 在 RDD 的操作小函数中，是不推荐直接操作全局状态的，spark 实现了一个

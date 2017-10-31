@@ -1,5 +1,6 @@
 package com.sealday.sparkdemo;
 
+import org.apache.spark.api.java.JavaFutureAction;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -56,7 +57,6 @@ public class HomeController {
         for (int i = 0; i < num; i++) {
             l.add(i);
         }
-
         long count = jsc.parallelize(l).filter(i -> {
             double x = Math.random();
             double y = Math.random();
@@ -65,15 +65,35 @@ public class HomeController {
         return 4.0 * count / num;
     }
 
-    @RequestMapping("/examples/pi_multi")
-    double piEstimationMulti(@RequestParam(defaultValue = "10", required = false) int num) {
+    @RequestMapping("/examples/pi_async")
+    List<Integer> piEstimationAsync(@RequestParam(defaultValue = "10", required = false) int num) {
         List<Integer> l = new ArrayList<>(num);
         for (int i = 0; i < num; i++) {
             l.add(i);
         }
+        JavaFutureAction<Long> countJob = jsc.parallelize(l).filter(i -> {
+            double x = Math.random();
+            double y = Math.random();
+            return x * x + y * y < 1;
+        }).countAsync();
+        return countJob.jobIds();
+    }
 
-        l.parallelStream().forEach(i -> piEstimation(10000000));
-        return 1;
+    @RequestMapping("/examples/pi_multi")
+    String piEstimationMulti(@RequestParam(defaultValue = "10", required = false) int num,
+                             @RequestParam(defaultValue = "10000000", required = false) int count) {
+        for (int i = 0; i < num; i++) {
+            List<Integer> l = new ArrayList<>(count);
+            for (int j = 0; j < count; j++) {
+                l.add(j);
+            }
+            JavaFutureAction<Long> countJob = jsc.parallelize(l).filter(k -> {
+                double x = Math.random();
+                double y = Math.random();
+                return x * x + y * y < 1;
+            }).countAsync();
+        }
+        return "submitted";
     }
 
     @RequestMapping("/examples/text_search")

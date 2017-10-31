@@ -91,10 +91,8 @@ public class HomeController {
 
     @RequestMapping("/examples/simple_op")
     long simpleDataOp() {
-        // Creates a DataFrame based on a table named "people"
-// stored in a MySQL database.
         String url =
-                "jdbc:postgresql://localhost:7777/seal?user=seal;password=..xiao";
+                "jdbc:mysql://127.0.0.1/test?user=seal&password=..xiao";
         Dataset<Row> df = spark.sqlContext()
                 .read()
                 .format("jdbc")
@@ -102,10 +100,8 @@ public class HomeController {
                 .option("dbtable", "people")
                 .load();
 
-        // Looks the schema of this DataFrame.
         df.printSchema();
 
-        // Counts people by age
         Dataset<Row> countsByAge = df.groupBy("age").count();
         countsByAge.show();
         return 0;

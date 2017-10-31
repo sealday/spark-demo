@@ -17,6 +17,11 @@ JavaRDD<Integer> lineLengths = lines.map(new GetLength());
 int totalLength = lineLengths.reduce(new Sum());
 ```
 
+## 累加器 Accumulators
+
+在 RDD 的操作小函数中，是不推荐直接操作全局状态的，spark 实现了一个
+累加器用于某些特殊目的，一般除了做计数这一目的外，也不需要操作全局状态。
+
 ## 其他
 
 [任务调度](http://uohzoaix.github.io/studies/2014/09/23/sparkJobScheduling/)
